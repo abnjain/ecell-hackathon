@@ -82,7 +82,7 @@ export default function AdminDashboard() {
         fetch("/api/admin/phases"),
         fetch("/api/admin/sponsors"),
       ])
-      if (teamsRes.status === 401) { router.push("/admin/login"); return }
+      if (teamsRes.status === 401 || teamsRes.status === 403) { router.push("/admin/login"); return }
       const teamsData = await teamsRes.json()
       const phasesData = await phasesRes.json()
       const sponsorsData = await sponsorsRes.json()

@@ -45,6 +45,10 @@ export default function DashboardPage() {
           router.push("/login")
           return null
         }
+        if (r.status === 403) {
+          router.push("/forbidden")
+          return null
+        }
         return r.json()
       })
       .then((data) => {
