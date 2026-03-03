@@ -1,14 +1,17 @@
 import nodemailer from "nodemailer"
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-})
+function getTransporter() {
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  })
+}
 
 export async function sendOTP(email: string, otp: string) {
+  const transporter = getTransporter()
   await transporter.sendMail({
     from: `"Squid Games ECELL" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -27,6 +30,7 @@ export async function sendOTP(email: string, otp: string) {
 }
 
 export async function sendReminderEmail(email: string, teamName: string, subject: string, message: string) {
+  const transporter = getTransporter()
   await transporter.sendMail({
     from: `"Squid Games ECELL" <${process.env.EMAIL_USER}>`,
     to: email,

@@ -2,7 +2,9 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 import { cookies } from "next/headers"
 
-const JWT_SECRET = process.env.JWT_SECRET || "squid-games-secret-2026"
+function getJwtSecret() {
+  return process.env.JWT_SECRET || "squid-games-secret-2026"
+}
 
 export interface TokenPayload {
   userId: string
@@ -11,12 +13,12 @@ export interface TokenPayload {
 }
 
 export function signToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" })
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" })
 }
 
 export function verifyToken(token: string): TokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload
+    return jwt.verify(token, getJwtSecret()) as TokenPayload
   } catch {
     return null
   }
@@ -41,4 +43,27 @@ export async function getAdminSession(): Promise<TokenPayload | null> {
   const session = await getSession()
   if (!session || session.role !== "admin") return null
   return session
+}
+
+export async function requireAdmin(): Promise<{ session: TokenPayload | null; errorResponse: Response | null }> {
+  const session = await getSession()
+  if (!session) {
+    return {
+      session: null,
+      errorResponse: new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      }),
+    }
+  }
+  if (session.role !== "admin") {
+    return {
+      session: null,
+      errorResponse: new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+    }
+  }
+  return { session, errorResponse: null }
 }
